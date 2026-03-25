@@ -24,6 +24,15 @@
     <script>
         const contractAddress = "0x289ecc7c44b8592f27c2e80112fd34aaaa8c6dc6a81a9fe22c66749ce6617116";
         
+        // GenLayer Network Configuration
+        const genLayerConfig = {
+            chainId: '0x1ed', // 493 in Hex
+            chainName: 'GenLayer Testnet',
+            nativeCurrency: { name: 'GEN', symbol: 'GEN', decimals: 18 },
+            rpcUrls: ['https://rpc.testnet.genlayer.com'],
+            blockExplorerUrls: ['https://explorer.testnet.genlayer.com']
+        };
+
         const nfts = [
             { id: 1, name: "Sonuno Genesis", price: "FREE", date: new Date("2026-03-25"), img: "images/1.PNG" },
             { id: 2, name: "Sonuno Mystic", price: "0.5 GEN", date: new Date("2026-04-25"), img: "images/2.PNG" },
@@ -34,6 +43,7 @@
             { id: 7, name: "Sonuno Infinity", price: "3.0 GEN", date: new Date("2026-09-25"), img: "images/7.PNG" }
         ];
 
+        // Render UI
         const grid = document.getElementById('nft-grid');
         const now = new Date();
 
@@ -61,7 +71,7 @@
                                 <p class="text-xl font-black">${nft.price}</p>
                             </div>
                         </div>
-                        <button onclick="${isLive ? `mintNFT(${nft.id})` : ''}" class="w-full font-black py-4 rounded-2xl transition-all uppercase tracking-widest ${buttonClass}">
+                        <button onclick="${isLive ? `handleMint(${nft.id})` : ''}" class="w-full font-black py-4 rounded-2xl transition-all uppercase tracking-widest ${buttonClass}">
                             ${buttonText}
                         </button>
                     </div>
@@ -69,37 +79,77 @@
             `;
         });
 
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    document.getElementById('connectBtn').innerText = accounts[0].slice(0, 6) + "... Connected";
-                    document.getElementById('connectBtn').classList.replace('bg-blue-600', 'bg-green-600');
-                } catch (e) { console.error(e); }
-            } else {
-                alert("Please install GenLayer Wallet/MetaMask!");
+        // --- Wallet Logic ---
+
+        async function switchNetwork() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: genLayerConfig.chainId }],
+                });
+            } catch (err) {
+                if (err.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [genLayerConfig],
+                    });
+                }
             }
         }
 
-        async function mintNFT(id) {
-            if (!window.ethereum) return alert("Connect wallet first!");
+        async function connectWallet() {
+            if (!window.ethereum) return alert("Install MetaMask/Rabby!");
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                alert("Minting Collection #" + id + "... Confirm in your wallet.");
+                await switchNetwork();
+                const address = accounts[0];
+                document.getElementById('connectBtn').innerText = address.slice(0, 6) + "..." + address.slice(-4) + " (Switch)";
+                document.getElementById('connectBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            } catch (e) { console.error(e); }
+        }
+
+        async function handleMint(id) {
+            if (!window.ethereum) return alert("Connect wallet first!");
+            try {
+                // Ensure we are on GenLayer before minting
+                await switchNetwork();
                 
-                // Using eth_sendTransaction directly for GenLayer compatibility
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Encoding mint_nft(uint256)
+                const functionSelector = "0x6a6278d1"; 
+                const encodedArg = id.toString(16).padStart(64, '0');
+                const data = functionSelector + encodedArg;
+
+                alert(`Requesting mint for Sonuno #${id}... Check your wallet.`);
+
                 const txHash = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [{
                         from: accounts[0],
                         to: contractAddress,
-                        data: '0x6a6278d1' + id.toString(16).padStart(64, '0')
+                        data: data
                     }],
                 });
+
                 alert("Transaction Sent! Hash: " + txHash);
             } catch (err) {
-                alert("Error: " + (err.message || "Failed to mint"));
+                console.error(err);
+                alert("Error: " + (err.data?.message || err.message));
             }
+        }
+
+        // Auto-update if user changes account in wallet
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    const address = accounts[0];
+                    document.getElementById('connectBtn').innerText = address.slice(0, 6) + "..." + address.slice(-4) + " (Switch)";
+                } else {
+                    document.getElementById('connectBtn').innerText = "Connect Wallet";
+                    document.getElementById('connectBtn').classList.replace('bg-green-600', 'bg-blue-600');
+                }
+            });
         }
     </script>
 </body>
