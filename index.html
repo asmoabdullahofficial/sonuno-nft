@@ -3,58 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonuno NFT Platform</title>
+    <title>Sonuno NFT - GenLayer Build</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-    <nav class="p-6 border-b border-gray-800 flex justify-between items-center">
-        <h1 class="text-2xl font-bold tracking-tighter text-blue-500">SONUNO-NFT</h1>
-        <button id="connectWallet" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold transition">Connect Wallet</button>
+<body class="bg-black text-white selection:bg-blue-500">
+    <nav class="p-6 flex justify-between items-center border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
+        <h1 class="text-3xl font-black tracking-tighter text-blue-500">SONUNO<span class="text-white">NFT</span></h1>
+        <button id="connectBtn" class="bg-blue-600 hover:bg-blue-700 px-8 py-2 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95">Connect Wallet</button>
     </nav>
 
-    <div class="container mx-auto px-6 py-12">
-        <div class="text-center mb-16">
-            <h2 class="text-5xl font-extrabold mb-4">Exclusive GenLayer Collections</h2>
-            <p class="text-gray-400">Mint your unique intelligent NFTs on the Bradbury Testnet.</p>
-        </div>
+    <div class="container mx-auto px-6 py-20 text-center">
+        <h2 class="text-6xl md:text-8xl font-black mb-6 uppercase leading-none">The Future of <br><span class="text-blue-500 italic">Intelligent</span> NFTs</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto text-lg">7 Unique Artworks. 100 Supply Each. Powered by GenLayer.</p>
+    </div>
 
-        <div id="nft-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="container mx-auto px-6 pb-20">
+        <div id="nft-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             </div>
     </div>
 
     <script>
         const contractAddress = "0x289ecc7c44b8592f27c2e80112fd34aaaa8c6dc6a81a9fe22c66749ce6617116";
+        
         const nfts = [
-            { id: 1, name: "Sonuno Genesis", price: "Free", date: "Mar 25 - Apr 25" },
-            { id: 2, name: "Sonuno Mystic", price: "0.5 GEN", date: "Apr 25 - May 25" },
-            { id: 3, name: "Sonuno Eternal", price: "1.0 GEN", date: "May 25 - Jun 25" },
-            { id: 4, name: "Sonuno Legend", price: "1.5 GEN", date: "Jun 25 - Jul 25" },
-            { id: 5, name: "Sonuno Dream", price: "2.0 GEN", date: "Jul 25 - Aug 25" },
-            { id: 6, name: "Sonuno Future", price: "2.5 GEN", date: "Aug 25 - Sep 25" },
-            { id: 7, name: "Sonuno Infinity", price: "3.0 GEN", date: "Sep 25 - Oct 25" }
+            { id: 1, name: "Sonuno Genesis", price: "FREE", date: "Mar 25", img: "images/1.PNG" },
+            { id: 2, name: "Sonuno Mystic", price: "0.5 GEN", date: "Apr 25", img: "images/2.PNG" },
+            { id: 3, name: "Sonuno Eternal", price: "1.0 GEN", date: "May 25", img: "images/3.PNG" },
+            { id: 4, name: "Sonuno Legend", price: "1.5 GEN", date: "Jun 25", img: "images/4.PNG" },
+            { id: 5, name: "Sonuno Dream", price: "2.0 GEN", date: "Jul 25", img: "images/5.PNG" },
+            { id: 6, name: "Sonuno Future", price: "2.5 GEN", date: "Aug 25", img: "images/6.png" },
+            { id: 7, name: "Sonuno Infinity", price: "3.0 GEN", date: "Sep 25", img: "images/7.PNG" }
         ];
 
         const grid = document.getElementById('nft-grid');
         nfts.forEach(nft => {
             grid.innerHTML += `
-                <div class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-blue-500 transition duration-300">
-                    <div class="h-64 bg-gray-700 flex items-center justify-center text-gray-500 italic">
-                        [NFT Image ${nft.id}]
+                <div class="bg-white/5 rounded-3xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all group">
+                    <div class="relative overflow-hidden">
+                        <img src="${nft.img}" alt="${nft.name}" class="w-full h-80 object-cover group-hover:scale-110 transition-duration-500">
+                        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold border border-white/20">Supply: 100</div>
                     </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-xl font-bold">${nft.name}</h3>
-                            <span class="text-blue-400 font-mono text-sm">${nft.price}</span>
+                    <div class="p-8">
+                        <div class="flex justify-between items-end mb-6">
+                            <div>
+                                <h3 class="text-2xl font-bold">${nft.name}</h3>
+                                <p class="text-blue-400 text-sm font-semibold">${nft.date} Launch</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 uppercase tracking-widest">Price</p>
+                                <p class="text-xl font-black">${nft.price}</p>
+                            </div>
                         </div>
-                        <p class="text-gray-400 text-sm mb-4">Minting: ${nft.date}</p>
-                        <button onclick="mint(${nft.id})" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">Mint Now</button>
+                        <button onclick="mintNFT(${nft.id})" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-colors uppercase tracking-widest">Mint Now</button>
                     </div>
                 </div>
             `;
         });
 
-        async function mint(id) {
-            alert("Minting " + id + " on GenLayer... (Connecting to SDK)");
+        function mintNFT(id) {
+            alert("GenLayer Wallet integration coming next! Minting NFT #" + id);
         }
     </script>
 </body>
