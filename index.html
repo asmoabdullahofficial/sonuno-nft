@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonuno NFT - GenLayer Build</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body class="bg-black text-white selection:bg-blue-500">
     <nav class="p-6 flex justify-between items-center border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
         <h1 class="text-3xl font-black tracking-tighter text-blue-500">SONUNO<span class="text-white">NFT</span></h1>
-        <button id="connectBtn" class="bg-blue-600 hover:bg-blue-700 px-8 py-2 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95">Connect Wallet</button>
+        <button id="connectBtn" onclick="connectWallet()" class="bg-blue-600 hover:bg-blue-700 px-8 py-2 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95">Connect Wallet</button>
     </nav>
 
     <div class="container mx-auto px-6 py-20 text-center">
@@ -18,8 +19,7 @@
     </div>
 
     <div class="container mx-auto px-6 pb-20">
-        <div id="nft-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            </div>
+        <div id="nft-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
     </div>
 
     <script>
@@ -60,8 +60,47 @@
             `;
         });
 
-        function mintNFT(id) {
-            alert("GenLayer Wallet integration coming next! Minting NFT #" + id);
+        // --- WEB3 LOGIC ---
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    document.getElementById('connectBtn').innerText = accounts[0].slice(0, 6) + "... Connected";
+                    document.getElementById('connectBtn').classList.replace('bg-blue-600', 'bg-green-600');
+                } catch (error) {
+                    alert("User denied connection");
+                }
+            } else {
+                alert("Please install MetaMask or a GenLayer compatible wallet!");
+            }
+        }
+
+        async function mintNFT(id) {
+            if (!window.ethereum) return alert("Connect wallet first!");
+
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+
+                // ABI matches the contract functions we deployed
+                const contract = new ethers.Contract(contractAddress, [
+                    "function mint_nft(uint256 collection_id) public"
+                ], signer);
+
+                alert("Confirming mint for Collection #" + id + "... Please wait for MetaMask.");
+                
+                // Calling the actual smart contract function
+                const tx = await contract.mint_nft(id);
+                
+                alert("Transaction Sent! Hash: " + tx.hash);
+                await tx.wait(); // Wait for blockchain confirmation
+                alert("Success! NFT #" + id + " has been minted to your wallet.");
+
+            } catch (error) {
+                console.error(error);
+                alert("Minting failed! Error: " + error.message);
+            }
         }
     </script>
 </body>
