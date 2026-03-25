@@ -1,107 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonuno NFT - GenLayer Build</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-</head>
-<body class="bg-black text-white selection:bg-blue-500">
-    <nav class="p-6 flex justify-between items-center border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
-        <h1 class="text-3xl font-black tracking-tighter text-blue-500">SONUNO<span class="text-white">NFT</span></h1>
-        <button id="connectBtn" onclick="connectWallet()" class="bg-blue-600 hover:bg-blue-700 px-8 py-2 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95">Connect Wallet</button>
-    </nav>
+<script>
+    const contractAddress = "0x289ecc7c44b8592f27c2e80112fd34aaaa8c6dc6a81a9fe22c66749ce6617116";
+    
+    // Exact dates for automatic activation
+    const nfts = [
+        { id: 1, name: "Sonuno Genesis", price: "FREE", date: new Date("2026-03-25"), img: "images/1.PNG" },
+        { id: 2, name: "Sonuno Mystic", price: "0.5 GEN", date: new Date("2026-04-25"), img: "images/2.PNG" },
+        { id: 3, name: "Sonuno Eternal", price: "1.0 GEN", date: new Date("2026-05-25"), img: "images/3.PNG" },
+        { id: 4, name: "Sonuno Legend", price: "1.5 GEN", date: new Date("2026-06-25"), img: "images/4.PNG" },
+        { id: 5, name: "Sonuno Dream", price: "2.0 GEN", date: new Date("2026-07-25"), img: "images/5.PNG" },
+        { id: 6, name: "Sonuno Future", price: "2.5 GEN", date: new Date("2026-08-25"), img: "images/6.png" },
+        { id: 7, name: "Sonuno Infinity", price: "3.0 GEN", date: new Date("2026-09-25"), img: "images/7.PNG" }
+    ];
 
-    <div class="container mx-auto px-6 py-20 text-center">
-        <h2 class="text-6xl md:text-8xl font-black mb-6 uppercase leading-none">The Future of <br><span class="text-blue-500 italic">Intelligent</span> NFTs</h2>
-        <p class="text-gray-400 max-w-2xl mx-auto text-lg">7 Unique Artworks. 100 Supply Each. Powered by GenLayer.</p>
-    </div>
+    const grid = document.getElementById('nft-grid');
+    const now = new Date();
 
-    <div class="container mx-auto px-6 pb-20">
-        <div id="nft-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
-    </div>
+    nfts.forEach(nft => {
+        const isLive = now >= nft.date;
+        const buttonText = isLive ? "Mint Now" : `Starts ${nft.date.toDateString().slice(4, 10)}`;
+        const buttonClass = isLive 
+            ? "bg-white text-black hover:bg-blue-500 hover:text-white" 
+            : "bg-gray-800 text-gray-500 cursor-not-allowed";
 
-    <script>
-        const contractAddress = "0x289ecc7c44b8592f27c2e80112fd34aaaa8c6dc6a81a9fe22c66749ce6617116";
-        
-        const nfts = [
-            { id: 1, name: "Sonuno Genesis", price: "FREE", date: "Mar 25", img: "images/1.PNG" },
-            { id: 2, name: "Sonuno Mystic", price: "0.5 GEN", date: "Apr 25", img: "images/2.PNG" },
-            { id: 3, name: "Sonuno Eternal", price: "1.0 GEN", date: "May 25", img: "images/3.PNG" },
-            { id: 4, name: "Sonuno Legend", price: "1.5 GEN", date: "Jun 25", img: "images/4.PNG" },
-            { id: 5, name: "Sonuno Dream", price: "2.0 GEN", date: "Jul 25", img: "images/5.PNG" },
-            { id: 6, name: "Sonuno Future", price: "2.5 GEN", date: "Aug 25", img: "images/6.png" },
-            { id: 7, name: "Sonuno Infinity", price: "3.0 GEN", date: "Sep 25", img: "images/7.PNG" }
-        ];
-
-        const grid = document.getElementById('nft-grid');
-        nfts.forEach(nft => {
-            grid.innerHTML += `
-                <div class="bg-white/5 rounded-3xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all group">
-                    <div class="relative overflow-hidden">
-                        <img src="${nft.img}" alt="${nft.name}" class="w-full h-80 object-cover group-hover:scale-110 transition-duration-500">
-                        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold border border-white/20">Supply: 100</div>
-                    </div>
-                    <div class="p-8">
-                        <div class="flex justify-between items-end mb-6">
-                            <div>
-                                <h3 class="text-2xl font-bold">${nft.name}</h3>
-                                <p class="text-blue-400 text-sm font-semibold">${nft.date} Launch</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs text-gray-500 uppercase tracking-widest">Price</p>
-                                <p class="text-xl font-black">${nft.price}</p>
-                            </div>
-                        </div>
-                        <button onclick="mintNFT(${nft.id})" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-colors uppercase tracking-widest">Mint Now</button>
-                    </div>
+        grid.innerHTML += `
+            <div class="bg-white/5 rounded-3xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all group">
+                <div class="relative overflow-hidden">
+                    <img src="${nft.img}" alt="${nft.name}" class="w-full h-80 object-cover ${isLive ? 'group-hover:scale-110' : 'grayscale'} transition-duration-500">
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold border border-white/20">Supply: 100</div>
                 </div>
-            `;
-        });
+                <div class="p-8">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold">${nft.name}</h3>
+                            <p class="text-blue-400 text-sm font-semibold italic">${isLive ? 'LIVE NOW' : 'UPCOMING'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Price</p>
+                            <p class="text-xl font-black">${nft.price}</p>
+                        </div>
+                    </div>
+                    <button onclick="${isLive ? `mintNFT(${nft.id})` : ''}" class="w-full font-black py-4 rounded-2xl transition-colors uppercase tracking-widest ${buttonClass}">
+                        ${buttonText}
+                    </button>
+                </div>
+            </div>
+        `;
+    });
 
-        // --- WEB3 LOGIC ---
-
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    document.getElementById('connectBtn').innerText = accounts[0].slice(0, 6) + "... Connected";
-                    document.getElementById('connectBtn').classList.replace('bg-blue-600', 'bg-green-600');
-                } catch (error) {
-                    alert("User denied connection");
-                }
-            } else {
-                alert("Please install MetaMask or a GenLayer compatible wallet!");
-            }
-        }
-
-        async function mintNFT(id) {
-            if (!window.ethereum) return alert("Connect wallet first!");
-
+    async function connectWallet() {
+        if (window.ethereum) {
             try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-
-                // ABI matches the contract functions we deployed
-                const contract = new ethers.Contract(contractAddress, [
-                    "function mint_nft(uint256 collection_id) public"
-                ], signer);
-
-                alert("Confirming mint for Collection #" + id + "... Please wait for MetaMask.");
-                
-                // Calling the actual smart contract function
-                const tx = await contract.mint_nft(id);
-                
-                alert("Transaction Sent! Hash: " + tx.hash);
-                await tx.wait(); // Wait for blockchain confirmation
-                alert("Success! NFT #" + id + " has been minted to your wallet.");
-
-            } catch (error) {
-                console.error(error);
-                alert("Minting failed! Error: " + error.message);
-            }
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('connectBtn').innerText = accounts[0].slice(0, 6) + "... Connected";
+                document.getElementById('connectBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            } catch (error) { console.error(error); }
         }
-    </script>
-</body>
-</html>
+    }
+
+    async function mintNFT(id) {
+        if (!window.ethereum) return alert("Connect wallet first!");
+        try {
+            // Fix: Using direct request for GenLayer's unique address format
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const from = accounts[0];
+            
+            alert("Confirming mint for Collection #" + id + "... [GenLayer Network]");
+            
+            const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: from,
+                    to: contractAddress,
+                    data: `0x6a6278d1${id.toString(16).padStart(64, '0')}` // Manual encoding for mint_nft(uint256)
+                }],
+            });
+
+            alert("Transaction Sent! Hash: " + txHash);
+        } catch (error) {
+            console.error(error);
+            alert("Minting failed! Error: " + (error.data?.message || error.message));
+        }
+    }
+</script>
